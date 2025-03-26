@@ -25,3 +25,18 @@ export const GetMe = async (parameters: {
   }
 };
 
+export const GetAllUsers = async (): Promise<GetAllUsersResult> => {
+  try {
+    const users = await prisma.user.findMany();
+    if (!users) {
+      throw GetAllUsersError.NO_USERS_FOUND;
+    }
+    const result: GetAllUsersResult = {
+      users: users,
+    };
+    return result;
+  } catch (e) {
+    console.error(e);
+    throw GetAllUsersError.UNKNOWN;
+  }
+};
