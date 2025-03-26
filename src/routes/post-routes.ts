@@ -2,11 +2,13 @@ import { Hono } from "hono";
 import { tokenMiddleware } from "./middlewares/token-middleware";
 import {
   createPost,
+  deletePost,
   getAllPosts,
   getPostsByUser,
+  
 
 } from "../controllers/posts/post-contoller";
-import { GetPostsError, PostStatus } from "../controllers/posts/post-type";
+import { DeletePostError, GetPostsError, PostStatus } from "../controllers/posts/post-type";
 
 export const postsRoutes = new Hono();
 postsRoutes.post("/", tokenMiddleware, async (context) => {
@@ -77,6 +79,41 @@ postsRoutes.get("/me", tokenMiddleware, async (context) => {
     }
 
     return context.json(result, 200);
+  } catch (error) {
+    console.error(error);
+    return context.json({ error: "Server error" }, 500);
+  }
+});
+
+
+//delete by userId
+postsRoutes.delete("/:postId", tokenMiddleware, async (context) => {
+  try {
+    const userId = context.get("userId");
+    const postId = context.req.param("postId");
+
+    if (!userId) {
+      return context.json({ error: "Unauthorized" }, 401);
+    }
+
+    const result = await deletePost({ postId, userId });
+
+    if (result === DeletePostError.POST_NOT_FOUND) {
+      return context.json({ error: "Post not found" }, 404);
+    }
+
+    if (result === DeletePostError.UNAUTHORIZED) {
+      return context.json(
+        { error: "You are not authorized to delete this post" },
+        403
+      );
+    }
+
+    if (result === DeletePostError.DELETE_FAILED) {
+      return context.json({ error: "Failed to delete post" }, 500);
+    }
+
+    return context.json({ message: "Post deleted successfully" }, 200);
   } catch (error) {
     console.error(error);
     return context.json({ error: "Server error" }, 500);
