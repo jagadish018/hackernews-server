@@ -1,6 +1,6 @@
 import type { Post } from "@prisma/client";
 
-export type PostCreate = {
+export type PostCreateResult = {
   post: Post;
 };
 
