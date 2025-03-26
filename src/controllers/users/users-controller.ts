@@ -1,3 +1,27 @@
-import type { User } from "@prisma/client";
+import { prisma } from "../../extras/prisma";
+import { GetAllUsersError, GetMeError, type GetAllUsersResult, type GetMeResult } from "./users-type";
 
+
+export const GetMe = async (parameters: {
+  userId: string;
+}): Promise<GetMeResult> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: parameters.userId },
+    });
+
+    if (!user) {
+      throw GetMeError.USER_NOT_FOUND;
+    }
+
+    const result: GetMeResult = {
+      user: user,
+    };
+
+    return result;
+  } catch (e) {
+    console.error(e);
+    throw GetMeError.UNKNOWN;
+  }
+};
 
