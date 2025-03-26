@@ -12,7 +12,6 @@ export type SignUpWithUsernameAndPasswordResult = {
 
 export enum LoginWithUsernameAndPasswordError {
   INCORRECT_USERNAME_OR_PASSWORD = "INCORRECT_USERNAME_OR_PASSWORD",
-  CONFLICTING_PASSWORD = "INVALID_PASSWORD",
 }
 export type LoginWithUsernameAndPasswordResult = {
   token: string;
