@@ -1,3 +1,4 @@
+import { getPagination } from "../../extras/pagination";
 import { prisma } from "../../extras/prisma";
 import { GetAllUsersError, GetMeError, type GetAllUsersResult, type GetMeResult } from "./users-type";
 
@@ -25,18 +26,19 @@ export const GetMe = async (parameters: {
   }
 };
 
+
+
 export const GetUsers = async (parameter: {
   page: number;
   limit: number;
 }): Promise<GetAllUsersResult> => {
   try {
-    const { page, limit } = parameter;
-    const skip = (page - 1) * limit;
+    const { skip, take } = getPagination(parameter.page, parameter.limit);
 
     const users = await prisma.user.findMany({
       orderBy: { name: "asc" },
       skip,
-      take: limit,
+      take,
     });
 
     if (!users || users.length === 0) {
