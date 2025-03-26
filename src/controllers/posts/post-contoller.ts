@@ -1,5 +1,6 @@
+import { getPagination } from "../../extras/pagination";
 import { prisma } from "../../extras/prisma";
-import { PostStatus, type PostCreate } from "./post-type";
+import { GetPostsError, PostStatus, type GetPostsResult, type PostCreate } from "./post-type";
 
 export const createPost = async (parameters: {
   title: string;
@@ -25,5 +26,39 @@ export const createPost = async (parameters: {
   } catch (error) {
     console.error(error);
     return PostStatus.POST_CREATION_FAILED;
+  }
+};
+
+
+//Get All posts
+export const getAllPosts = async (parameters: {
+  page: number;
+  limit: number;
+}): Promise<GetPostsResult> => {
+  try {
+    const { skip, take } = getPagination(parameters.page, parameters.limit);
+
+    const posts = await prisma.post.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: take,
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
+
+    if (!posts || posts.length === 0) {
+      throw new Error(GetPostsError.NO_POSTS_FOUND);
+    }
+
+    return { posts };
+  } catch (error) {
+    console.error(error);
+    throw new Error(GetPostsError.UNKNOWN);
   }
 };

@@ -9,3 +9,12 @@ export enum PostStatus {
   POST_CREATED = "POST_CREATED",
   POST_CREATION_FAILED = "POST_CREATION_FAILED",
 }
+
+export type GetPostsResult = {
+  posts: Post[];
+};
+
+export enum GetPostsError {
+  NO_POSTS_FOUND = "NO_POSTS_FOUND",
+  UNKNOWN = "UNKNOWN",
+}

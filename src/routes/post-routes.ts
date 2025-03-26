@@ -1,8 +1,8 @@
 
 import { Hono } from "hono";
 import { tokenMiddleware } from "./middlewares/token-middleware";
-import { createPost } from "../controllers/posts/post-contoller";
-import { PostStatus } from "../controllers/posts/post-type";
+import { createPost, getAllPosts } from "../controllers/posts/post-contoller";
+import { GetPostsError, PostStatus } from "../controllers/posts/post-type";
 
 export const postsRoutes = new Hono();
 postsRoutes.post("/", tokenMiddleware, async (context) => {
@@ -34,6 +34,29 @@ postsRoutes.post("/", tokenMiddleware, async (context) => {
 
     return context.json(result, 201); // ✅ Post created
   } catch (error) {
+    console.error(error);
+    return context.json({ error: "Server error" }, 500);
+  }
+});
+
+
+
+// GET /posts - Paginated, reverse chronological
+postsRoutes.get("/", tokenMiddleware, async (context) => {
+  try {
+    const page = parseInt(context.req.query("page") || "1", 10);
+    const limit = parseInt(context.req.query("limit") || "2", 10);
+
+    const result = await getAllPosts({ page, limit });
+    if (!result) {
+      return context.json({ error: "Users not found" }, 404);
+    }
+
+    return context.json(result, 200);
+  } catch (error) {
+    if (error === GetPostsError.NO_POSTS_FOUND) {
+      return context.json({ error: "No posts found" }, 404);
+    }
     console.error(error);
     return context.json({ error: "Server error" }, 500);
   }
