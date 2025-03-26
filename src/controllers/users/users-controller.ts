@@ -25,16 +25,25 @@ export const GetMe = async (parameters: {
   }
 };
 
-export const GetAllUsers = async (): Promise<GetAllUsersResult> => {
+export const GetUsers = async (parameter: {
+  page: number;
+  limit: number;
+}): Promise<GetAllUsersResult> => {
   try {
-    const users = await prisma.user.findMany();
-    if (!users) {
+    const { page, limit } = parameter;
+    const skip = (page - 1) * limit;
+
+    const users = await prisma.user.findMany({
+      orderBy: { name: "asc" },
+      skip,
+      take: limit,
+    });
+
+    if (!users || users.length === 0) {
       throw GetAllUsersError.NO_USERS_FOUND;
     }
-    const result: GetAllUsersResult = {
-      users: users,
-    };
-    return result;
+
+    return { users };
   } catch (e) {
     console.error(e);
     throw GetAllUsersError.UNKNOWN;
