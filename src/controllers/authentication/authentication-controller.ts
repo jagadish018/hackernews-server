@@ -1,86 +1,13 @@
+import { createHash } from "crypto";
 import {
+  LogInWithUsernameAndPasswordError,
   SignUpWithUsernameAndPasswordError,
-  LoginWithUsernameAndPasswordError,
-} from "./authentication-types";
-import {
+  type LogInWithUsernameAndPasswordResult,
   type SignUpWithUsernameAndPasswordResult,
-  type LoginWithUsernameAndPasswordResult,
 } from "./authentication-types";
-import { jwtSceretKey } from "../../../environment";
-import { createHash } from "node:crypto";
-import jwt from "jsonwebtoken";
 import { prisma } from "../../extras/prisma";
-
-export const signUpWithUsernameAndPassword = async (parameters: {
-    username: string; password: string;
-}): Promise<SignUpWithUsernameAndPasswordResult> => {
-    
-    // Check if the username already exists
-    const user = await prisma.user.findUnique({
-        where: {
-            username: parameters.username,
-        },
-    });
-
-    if (user) {
-        throw SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME;
-    }
-
-    // Create the user
-    const newUser = await prisma.user.create({
-        data: {
-            username: parameters.username,
-            password: createPasswordHash({ password: parameters.password }),
-        },
-    });
-
-    // Generate token
-    const token = createJWToken({
-        id: newUser.id,
-        username: newUser.username,
-    });
-
-    const result: SignUpWithUsernameAndPasswordResult = {
-        user: newUser,
-        token: token,
-    };
-    return result;
-}
-
-export const LoginWithUsernameAndPassword = async (parameters: {
-    username: string;
-    password: string;
-}
-): Promise<LoginWithUsernameAndPasswordResult> => {
-
-    //check if the user exists
-    const user = await prisma.user.findUnique({
-        where: {
-            username: parameters.username,
-        },
-    });
-
-    if (!user) {
-        throw LoginWithUsernameAndPasswordError.INCORRECT_USERNAME_OR_PASSWORD;
-    }
-
-     // Generate token
-     const token = createJWToken({
-       id: user.id,
-       username: user.username,
-     });
-
-     const result: LoginWithUsernameAndPasswordResult = {
-       user,
-       token,
-     };
-     return result;
-
-
-    
-    
-
-};
+import jwt from "jsonwebtoken";
+import { jwtSceretKey } from "../../../environment";
 
 export const createPasswordHash = (parameters: {
   password: string;
@@ -92,7 +19,6 @@ const createJWToken = (parameters: {
   id: string;
   username: string;
 }): string => {
-  // Generate token
   const jwtPayload: jwt.JwtPayload = {
     iss: "https://purpleshorts.co.in",
     sub: parameters.id,
@@ -104,4 +30,85 @@ const createJWToken = (parameters: {
   });
 
   return token;
+};
+
+export const signUpWithUsernameAndPassword = async (parameters: {
+  username: string;
+  password: string;
+  name: string;
+}): Promise<SignUpWithUsernameAndPasswordResult> => {
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        username: parameters.username,
+      },
+    });
+
+    if (existingUser) {
+      throw SignUpWithUsernameAndPasswordError.CONFLICTING_USERNAME;
+    }
+
+    const hashedPassword = createPasswordHash({
+      password: parameters.password,
+    });
+    const user = await prisma.user.create({
+      data: {
+        username: parameters.username,
+        password: hashedPassword,
+        name: parameters.name,
+      },
+    });
+
+    const jwtPayload: jwt.JwtPayload = {
+      iss: "http://purpleshorts.co.in",
+      sub: user.id,
+      username: user.username,
+    };
+
+    const token = jwt.sign(jwtPayload, jwtSceretKey, {
+      expiresIn: "30d",
+    });
+
+    const result: SignUpWithUsernameAndPasswordResult = {
+      token,
+      user,
+    };
+
+    return result;
+  } catch (e) {
+    console.error(e);
+    throw SignUpWithUsernameAndPasswordError.UNKNOWN;
+  }
+};
+
+export const logInWithUsernameAndPassword = async (parameters: {
+  username: string;
+  password: string;
+}): Promise<LogInWithUsernameAndPasswordResult> => {
+  const passwordHash = createPasswordHash({
+    password: parameters.password,
+  });
+
+  const user = await prisma.user.findUnique({
+    where: {
+      username: parameters.username,
+      password: passwordHash,
+    },
+  });
+
+  if (!user) {
+    throw LogInWithUsernameAndPasswordError.INCORRECT_USERNAME_OR_PASSWORD;
+  }
+
+  const token = createJWToken({
+    id: user.id,
+    username: user.username,
+  });
+
+  const result: LogInWithUsernameAndPasswordResult = {
+    token,
+    user,
+  };
+
+  return result;
 };
