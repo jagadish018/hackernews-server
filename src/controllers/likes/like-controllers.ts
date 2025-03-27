@@ -1,5 +1,6 @@
+import { getPagination } from "../../extras/pagination";
 import { prisma } from "../../extras/prisma";
-import { LikeStatus, type LikeCreate } from "./like-types";
+import { LikeStatus, type GetLikesResult, type LikeCreate } from "./like-types";
 
 // Function to create a like on a post
 export const createLike = async (params: {
@@ -42,3 +43,49 @@ export const createLike = async (params: {
     return { status: LikeStatus.UNKNOWN };
   }
 };
+
+
+//Get all likes on a specific post in reverse chronological order with pagination.
+export const getLikesOnPost = async (params: {
+  postId: string;
+  page: number;
+  limit: number;
+}): Promise<GetLikesResult | LikeStatus> => {
+  try {
+    const { skip, take } = getPagination(params.page, params.limit);
+
+    // Check if the post exists
+    const post = await prisma.post.findUnique({
+      where: { id: params.postId },
+    });
+
+    if (!post) {
+      return LikeStatus.POST_NOT_FOUND;
+    }
+
+    const likes = await prisma.like.findMany({
+      where: { postId: params.postId },
+      orderBy: { createdAt: "desc" }, // Reverse chronological order
+      skip,
+      take,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
+
+    if (!likes || likes.length === 0) {
+      return LikeStatus.NO_LIKES_FOUND;
+    }
+
+    return { likes };
+  } catch (error) {
+    console.error(error);
+    return LikeStatus.UNKNOWN;
+  }
+};
+
