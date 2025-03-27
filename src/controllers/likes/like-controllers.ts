@@ -89,3 +89,35 @@ export const getLikesOnPost = async (params: {
   }
 };
 
+
+
+export const deleteLikeOnPost = async (params: {
+  postId: string;
+  userId: string;
+}): Promise<LikeStatus> => {
+  try {
+    // Check if the like exists
+    const like = await prisma.like.findFirst({
+      where: {
+        postId: params.postId,
+        userId: params.userId,
+      },
+    });
+
+    if (!like) {
+      return LikeStatus.LIKE_NOT_FOUND;
+    }
+
+    // Delete the like
+    await prisma.like.delete({
+      where: {
+        id: like.id,
+      },
+    });
+
+    return LikeStatus.LIKE_DELETED;
+  } catch (error) {
+    console.error(error);
+    return LikeStatus.UNKNOWN;
+  }
+};

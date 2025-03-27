@@ -1,5 +1,5 @@
 
-import { createLike, getLikesOnPost } from "../controllers/likes/like-controllers";
+import { createLike, deleteLikeOnPost, getLikesOnPost } from "../controllers/likes/like-controllers";
 import { LikeStatus } from "../controllers/likes/like-types";
 import { tokenMiddleware } from "./middlewares/token-middleware";
 import { Hono } from "hono";
@@ -62,6 +62,36 @@ likeRoutes.get("/on/:postId",tokenMiddleware, async (context) => {
     }
 
     return context.json(result, 200);
+  } catch (error) {
+    console.error(error);
+    return context.json({ error: "Server error" }, 500);
+  }
+});
+
+//Delete a like
+likeRoutes.delete("/on/:postId", tokenMiddleware, async (context) => {
+  try {
+    const postId = context.req.param("postId");
+    const userId = context.get("userId"); // Extract userId from JWT middleware
+
+    if (!postId || !userId) {
+      return context.json({ error: "Invalid postId or userId" }, 400);
+    }
+
+    const result = await deleteLikeOnPost({ postId, userId });
+
+    if (result === LikeStatus.LIKE_NOT_FOUND) {
+      return context.json(
+        { error: "Like not found or not authored by you" },
+        404
+      );
+    }
+
+    if (result === LikeStatus.UNKNOWN) {
+      return context.json({ error: "An unknown error occurred" }, 500);
+    }
+
+    return context.json({ message: "Like deleted successfully" }, 200);
   } catch (error) {
     console.error(error);
     return context.json({ error: "Server error" }, 500);

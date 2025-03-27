@@ -4,6 +4,8 @@ export enum LikeStatus {
   UNKNOWN = "UNKNOWN",
   POST_NOT_FOUND = "POST_NOT_FOUND",
   NO_LIKES_FOUND = "NO_LIKES_FOUND",
+  LIKE_NOT_FOUND = "LIKE_NOT_FOUND",
+  LIKE_DELETED = "LIKE_DELETED",
 }
 
 export type LikeCreate = {
