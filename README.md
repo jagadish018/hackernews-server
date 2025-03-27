@@ -1,7 +1,7 @@
 # Comments API
 
 ## Description
-This is a REST API for managing comments on posts. It allows users to create, retrieve, update, and delete comments while ensuring authentication and authorization.
+This is a Hackernews-server project. It allows users to create, retrieve, update, and delete comments while ensuring authentication and authorization.
 
 ## Technologies Used
 - **Node.js**
