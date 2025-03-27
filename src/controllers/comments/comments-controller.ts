@@ -1,23 +1,23 @@
-import { prisma } from "../../extras/prisma";
-import { CommentStatus, type CommentCreateResult } from "./comments-type";
 
-export const createCommentOnPost = async (params: {
+import { getPagination } from "../../extras/pagination";
+import { prisma } from "../../extras/prisma";
+import { CommentStatus, type CreatCommentResult, type CommentResult } from "./comments-type";
+
+export const createComment = async (params: {
+  content: string;
   postId: string;
   userId: string;
-  content: string;
-}): Promise<CommentCreateResult | CommentStatus> => {
+}): Promise<CreatCommentResult> => {
   try {
-    // Check if the post exists
-    const postExists = await prisma.post.findUnique({
+    const existPostId = await prisma.post.findUnique({
       where: { id: params.postId },
     });
 
-    if (!postExists) {
-      return CommentStatus.POST_NOT_FOUND;
+    if (!existPostId) {
+      throw new Error(CommentStatus.POST_NOT_FOUND);
     }
 
-    // Create the comment
-    const comment = await prisma.comment.create({
+    const result = await prisma.comment.create({
       data: {
         content: params.content,
         post: { connect: { id: params.postId } },
@@ -25,9 +25,66 @@ export const createCommentOnPost = async (params: {
       },
     });
 
-    return { comment };
+    return { comment: result };
   } catch (error) {
-    console.error(error);
-    return CommentStatus.COMMENT_CREATION_FAILED;
+    console.error("Error creating comment:", error);
+    throw new Error(CommentStatus.COMMENT_CREATION_FAILED);
+  }
+};
+
+// Get all comments for a post (reverse chronological order, paginated)
+export const getAllComments = async (params: {
+  postId: string;
+  page: number;
+  limit: number;
+}): Promise<{ comments: any[] }> => {
+  try {
+    const { skip, take } = getPagination(params.page, params.limit);
+
+    const comments = await prisma.comment.findMany({
+      where: { postId: params.postId }, // Filter by postId
+      orderBy: { createdAt: "desc" }, // Reverse chronological order
+      skip,
+      take,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
+
+    if (!comments || comments.length === 0) {
+      return { comments: [] };
+    }
+
+    return { comments };
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    throw new Error(CommentStatus.UNKNOWN);
+  }
+};
+
+export const deleteComment = async (params: {
+  commentId: string;
+  userId: string;
+}): Promise<CommentStatus> => {
+  try {
+    const comment = await prisma.comment.findUnique({
+      where: { id: params.commentId },
+    });
+
+    if (!comment) {
+      return CommentStatus.COMMENT_NOT_FOUND;
+    }
+
+    await prisma.comment.delete({ where: { id: params.commentId } });
+
+    return CommentStatus.DELETE_SUCCESS;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    return CommentStatus.UNKNOWN;
   }
 };
