@@ -22,5 +22,3 @@ export type GetLikesResult = {
     };
   }[];
 };
-
-

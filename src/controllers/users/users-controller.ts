@@ -1,7 +1,11 @@
 import { getPagination } from "../../extras/pagination";
 import { prisma } from "../../extras/prisma";
-import { GetAllUsersError, GetMeError, type GetAllUsersResult, type GetMeResult } from "./users-type";
-
+import {
+  GetAllUsersError,
+  GetMeError,
+  type GetAllUsersResult,
+  type GetMeResult,
+} from "./users-type";
 
 export const GetMe = async (parameters: {
   userId: string;
@@ -25,8 +29,6 @@ export const GetMe = async (parameters: {
     throw GetMeError.UNKNOWN;
   }
 };
-
-
 
 export const GetUsers = async (parameter: {
   page: number;

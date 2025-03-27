@@ -1,7 +1,12 @@
 import { Hono } from "hono";
 import { CommentStatus } from "../controllers/comments/comments-type";
 import { tokenMiddleware } from "../routes/middlewares/token-middleware";
-import { createComment, deleteComment, getAllComments, updateComment } from "../controllers/comments/comments-controller";
+import {
+  createComment,
+  deleteComment,
+  getAllComments,
+  updateComment,
+} from "../controllers/comments/comments-controller";
 
 export const commentRoutes = new Hono();
 
@@ -14,21 +19,19 @@ commentRoutes.post("/on/:postId", tokenMiddleware, async (c) => {
     const result = await createComment({ content, postId, userId });
     return c.json(result);
   } catch (error) {
-    
-      if (error === CommentStatus.POST_NOT_FOUND) {
-        return c.json({ message: "Post not found" }, 404);
-      }
-      if (error === CommentStatus.COMMENT_CREATION_FAILED) {
-        return c.json({ message: "Comment creation failed" }, 500);
-      }
-    
+    if (error === CommentStatus.POST_NOT_FOUND) {
+      return c.json({ message: "Post not found" }, 404);
+    }
+    if (error === CommentStatus.COMMENT_CREATION_FAILED) {
+      return c.json({ message: "Comment creation failed" }, 500);
+    }
+
     return c.json({ message: "Unknown error" }, 500);
   }
 });
 
-
 //get all comments for a post
-commentRoutes.get("/on/:postId",tokenMiddleware, async (c) => {
+commentRoutes.get("/on/:postId", tokenMiddleware, async (c) => {
   const postId = c.req.param("postId");
   const page = Number(c.req.query("page")) || 1;
   const limit = Number(c.req.query("limit")) || 10;
@@ -40,8 +43,6 @@ commentRoutes.get("/on/:postId",tokenMiddleware, async (c) => {
     return c.json({ status: error }, 404);
   }
 });
-
-
 
 //delete
 commentRoutes.delete("/:commentId", tokenMiddleware, async (c) => {

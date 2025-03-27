@@ -1,5 +1,8 @@
-
-import { createLike, deleteLikeOnPost, getLikesOnPost } from "../controllers/likes/like-controllers";
+import {
+  createLike,
+  deleteLikeOnPost,
+  getLikesOnPost,
+} from "../controllers/likes/like-controllers";
 import { LikeStatus } from "../controllers/likes/like-types";
 import { tokenMiddleware } from "./middlewares/token-middleware";
 import { Hono } from "hono";
@@ -35,18 +38,17 @@ likeRoutes.post("/on/:postId", tokenMiddleware, async (context) => {
   }
 });
 
-
 //Get all likes of specific users
-likeRoutes.get("/on/:postId",tokenMiddleware, async (context) => {
+likeRoutes.get("/on/:postId", tokenMiddleware, async (context) => {
   try {
     const postId = context.req.param("postId");
     const page = parseInt(context.req.query("page") || "1", 10);
     const limit = parseInt(context.req.query("limit") || "2", 10);
 
     const result = await getLikesOnPost({
-      postId:postId,
+      postId: postId,
       page: page,
-      limit: limit
+      limit: limit,
     });
 
     if (result === LikeStatus.POST_NOT_FOUND) {

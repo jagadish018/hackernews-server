@@ -44,7 +44,6 @@ export const createLike = async (params: {
   }
 };
 
-
 //Get all likes on a specific post in reverse chronological order with pagination.
 export const getLikesOnPost = async (params: {
   postId: string;
@@ -88,8 +87,6 @@ export const getLikesOnPost = async (params: {
     return LikeStatus.UNKNOWN;
   }
 };
-
-
 
 export const deleteLikeOnPost = async (params: {
   postId: string;

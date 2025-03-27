@@ -1,7 +1,10 @@
-
 import { getPagination } from "../../extras/pagination";
 import { prisma } from "../../extras/prisma";
-import { CommentStatus, type CreatCommentResult, type CommentResult } from "./comments-type";
+import {
+  CommentStatus,
+  type CreatCommentResult,
+  type CommentResult,
+} from "./comments-type";
 
 export const createComment = async (params: {
   content: string;
@@ -104,7 +107,6 @@ export const updateComment = async (params: {
       return CommentStatus.COMMENT_NOT_FOUND;
     }
 
-   
     await prisma.comment.update({
       where: { id: params.commentId },
       data: { content: params.content },

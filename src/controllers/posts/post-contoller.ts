@@ -102,7 +102,6 @@ export const getPostsByUser = async (parameters: {
   }
 };
 
-
 //Delete post
 
 export const deletePost = async (params: {

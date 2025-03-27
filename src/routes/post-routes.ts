@@ -5,10 +5,12 @@ import {
   deletePost,
   getAllPosts,
   getPostsByUser,
-  
-
 } from "../controllers/posts/post-contoller";
-import { DeletePostError, GetPostsError, PostStatus } from "../controllers/posts/post-type";
+import {
+  DeletePostError,
+  GetPostsError,
+  PostStatus,
+} from "../controllers/posts/post-type";
 
 export const postsRoutes = new Hono();
 postsRoutes.post("/", tokenMiddleware, async (context) => {
@@ -84,7 +86,6 @@ postsRoutes.get("/me", tokenMiddleware, async (context) => {
     return context.json({ error: "Server error" }, 500);
   }
 });
-
 
 //delete by userId
 postsRoutes.delete("/:postId", tokenMiddleware, async (context) => {

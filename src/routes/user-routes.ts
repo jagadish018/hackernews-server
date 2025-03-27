@@ -3,7 +3,6 @@ import { tokenMiddleware } from "./middlewares/token-middleware";
 import { GetMe, GetUsers } from "../controllers/users/users-controller";
 import { GetAllUsersError, GetMeError } from "../controllers/users/users-type";
 
-
 export const usersRoutes = new Hono();
 
 usersRoutes.get("/me", tokenMiddleware, async (context) => {
@@ -28,8 +27,8 @@ usersRoutes.get("/", tokenMiddleware, async (context) => {
   try {
     const page = parseInt(context.req.query("page") || "1", 10);
     const limit = parseInt(context.req.query("limit") || "2", 10);
-      const result = await GetUsers({ page, limit });
-      
+    const result = await GetUsers({ page, limit });
+
     if (!result) {
       return context.json({ error: "Users not found" }, 404);
     }
@@ -43,5 +42,3 @@ usersRoutes.get("/", tokenMiddleware, async (context) => {
     }
   }
 });
-
-

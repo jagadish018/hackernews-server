@@ -15,5 +15,5 @@ export type CreatCommentResult = {
 };
 
 export type CommentResult = {
-  comment: Comment[]; 
+  comment: Comment[];
 };
