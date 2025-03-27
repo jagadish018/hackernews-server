@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { CommentStatus } from "../controllers/comments/comments-type";
 import { tokenMiddleware } from "../routes/middlewares/token-middleware";
-import { createComment, deleteComment, getAllComments } from "../controllers/comments/comments-controller";
+import { createComment, deleteComment, getAllComments, updateComment } from "../controllers/comments/comments-controller";
 
 export const commentRoutes = new Hono();
 
@@ -50,6 +50,20 @@ commentRoutes.delete("/:commentId", tokenMiddleware, async (c) => {
 
   try {
     const result = await deleteComment({ commentId, userId });
+    return c.json({ status: result }, 200);
+  } catch (error) {
+    return c.json({ status: error }, 403);
+  }
+});
+
+//update the comment
+commentRoutes.patch("/:commentId", tokenMiddleware, async (c) => {
+  const commentId = c.req.param("commentId");
+  const userId = c.get("userId");
+  const { content } = await c.req.json();
+
+  try {
+    const result = await updateComment({ commentId, userId, content });
     return c.json({ status: result }, 200);
   } catch (error) {
     return c.json({ status: error }, 403);

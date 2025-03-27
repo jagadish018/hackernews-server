@@ -88,3 +88,31 @@ export const deleteComment = async (params: {
     return CommentStatus.UNKNOWN;
   }
 };
+
+//update comment controller
+export const updateComment = async (params: {
+  commentId: string;
+  userId: string;
+  content: string;
+}): Promise<CommentStatus> => {
+  try {
+    const comment = await prisma.comment.findUnique({
+      where: { id: params.commentId },
+    });
+
+    if (!comment) {
+      return CommentStatus.COMMENT_NOT_FOUND;
+    }
+
+   
+    await prisma.comment.update({
+      where: { id: params.commentId },
+      data: { content: params.content },
+    });
+
+    return CommentStatus.UPDATE_SUCCESS;
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    return CommentStatus.UNKNOWN;
+  }
+};
