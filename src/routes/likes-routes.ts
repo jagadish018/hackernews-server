@@ -1,5 +1,5 @@
 
-import { createLike } from "../controllers/likes/like-controllers";
+import { createLike, getLikesOnPost } from "../controllers/likes/like-controllers";
 import { LikeStatus } from "../controllers/likes/like-types";
 import { tokenMiddleware } from "./middlewares/token-middleware";
 import { Hono } from "hono";
@@ -29,6 +29,39 @@ likeRoutes.post("/on/:postId", tokenMiddleware, async (context) => {
     }
 
     return context.json({ message: "Post liked successfully" }, 201);
+  } catch (error) {
+    console.error(error);
+    return context.json({ error: "Server error" }, 500);
+  }
+});
+
+
+//Get all likes of specific users
+likeRoutes.get("/on/:postId",tokenMiddleware, async (context) => {
+  try {
+    const postId = context.req.param("postId");
+    const page = parseInt(context.req.query("page") || "1", 10);
+    const limit = parseInt(context.req.query("limit") || "2", 10);
+
+    const result = await getLikesOnPost({
+      postId:postId,
+      page: page,
+      limit: limit
+    });
+
+    if (result === LikeStatus.POST_NOT_FOUND) {
+      return context.json({ error: "Post not found" }, 404);
+    }
+
+    if (result === LikeStatus.NO_LIKES_FOUND) {
+      return context.json({ error: "No likes found on this post" }, 404);
+    }
+
+    if (result === LikeStatus.UNKNOWN) {
+      return context.json({ error: "An unknown error occurred" }, 500);
+    }
+
+    return context.json(result, 200);
   } catch (error) {
     console.error(error);
     return context.json({ error: "Server error" }, 500);
