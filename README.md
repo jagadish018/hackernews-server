@@ -82,36 +82,6 @@ DELETE /comments/:commentId → Deletes a comment if authored by the current use
 
 PATCH /comments/:commentId → Updates a comment's text if authored by the current user.
 
-🔹 Example Responses
-
-✅ Get All Comments for a Post
-
-{
-  "status": "SUCCESS",
-  "comments": [
-    {
-      "id": "comment1",
-      "content": "Great post!",
-      "createdAt": "2025-03-27T12:00:00Z",
-      "user": {
-        "id": "user1",
-        "username": "john_doe"
-      }
-    }
-  ]
-}
-
-✅ Delete a Comment
-
-{
-  "status": "DELETE_SUCCESS"
-}
-
-✅ Update a Comment
-
-{
-  "status": "UPDATE_SUCCESS"
-}
 
 🛠️ Development Notes
 
