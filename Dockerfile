@@ -9,7 +9,7 @@ COPY tsconfig.build.json ./
 COPY prisma ./prisma
 
 # Install dependencies (including devDependencies)
-ENV NODE_ENV=development
+
 RUN npm install
 
 # Generate Prisma client if schema exists
