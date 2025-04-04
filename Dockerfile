@@ -1,21 +1,21 @@
-# Use Node.js base image
 FROM node:22.1.0
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy only needed files
 COPY package*.json ./
-RUN npm install
+COPY tsconfig*.json ./
+COPY src ./src
 
-# Copy source code
+# Copy Prisma folder only if it exists by copying everything, relying on .dockerignore
 COPY . .
 
-# Build TypeScript
+RUN npm install
+
+RUN if [ -f "./prisma/schema.prisma" ]; then npx prisma generate; else echo "Skipping prisma generate"; fi
+
 RUN npm run build
 
-# Expose the port used by the app
 EXPOSE 3000
 
-# Run prisma generate + start server with environment vars available
-CMD ["sh", "-c", "npx prisma generate && npm start"]
+CMD ["npm", "start"]
