@@ -1,15 +1,21 @@
+# Use Node.js base image
 FROM node:22.1.0
 
+# Set working directory
 WORKDIR /app
 
-COPY . .
-
+# Copy package files and install dependencies
+COPY package*.json ./
 RUN npm install
 
-RUN if [ -f "./prisma/schema.prisma" ]; then npx prisma generate; fi
+# Copy source code
+COPY . .
 
+# Build TypeScript
 RUN npm run build
 
+# Expose the port used by the app
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Run prisma generate + start server with environment vars available
+CMD ["sh", "-c", "npx prisma generate && npm start"]

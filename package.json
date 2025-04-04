@@ -7,7 +7,7 @@
     "start": "node dist/src/index.js"
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.0",
+    "@hono/node-server": "^1.14.0", 
     "@prisma/client": "^6.5.0",
     "@types/jsonwebtoken": "^9.0.9",
     "hono": "^4.7.5",
