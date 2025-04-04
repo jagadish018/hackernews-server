@@ -2,12 +2,11 @@ FROM node:22.1.0
 
 WORKDIR /app
 
-# Copy necessary files first (to improve caching)
+# Copy necessary files first
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY tsconfig.build.json ./
 COPY prisma ./prisma
-COPY .env ./
 
 # Install dependencies
 RUN npm install
@@ -24,9 +23,8 @@ RUN npm run build
 # Set environment to production
 ENV NODE_ENV=production
 
-# Use dynamic PORT and load environment variables
-ENV PORT=3000
-EXPOSE $PORT
+# Expose the necessary port
+EXPOSE 3000
 
-# Start the application with dotenv loaded
-CMD ["node", "-r", "dotenv/config", "dist/index.js"]
+# Start the application with environment variables
+CMD ["sh", "-c", "node dist/index.js"]
