@@ -11,11 +11,26 @@ export const openapi = {
     { name: "Likes", description: "Post like/unlike functionality" },
     { name: "Comments", description: "Post comments management" },
   ],
+  components: {
+    securitySchemes: {
+      TokenAuth: {
+        type: "apiKey",
+        in: "header",
+        name: "token",
+      },
+    },
+  },
+  security: [
+    {
+      TokenAuth: [],
+    },
+  ],
   paths: {
     "/auth/sign-in": {
       post: {
         tags: ["Auth"],
         summary: "Sign up with username and password",
+        security: [],
         requestBody: {
           required: true,
           content: {
@@ -24,7 +39,7 @@ export const openapi = {
                 type: "object",
                 properties: {
                   username: { type: "string" },
-                  password: { type: "string" },
+                  password: { type: "string", format: "password" }, // 👈 updated
                   name: { type: "string" },
                 },
                 required: ["username", "password", "name"],
@@ -42,6 +57,7 @@ export const openapi = {
       post: {
         tags: ["Auth"],
         summary: "Log in with username and password",
+        security: [],
         requestBody: {
           required: true,
           content: {
@@ -50,7 +66,7 @@ export const openapi = {
                 type: "object",
                 properties: {
                   username: { type: "string" },
-                  password: { type: "string" },
+                  password: { type: "string", format: "password" }, // 👈 updated
                 },
                 required: ["username", "password"],
               },
@@ -63,6 +79,7 @@ export const openapi = {
         },
       },
     },
+
     "/users/me": {
       get: {
         tags: ["Users"],
