@@ -18,6 +18,4 @@ allRoutes.route("/comments", commentRoutes);
 allRoutes.route("/ui", swaggerRoutes);
 allRoutes.route("/api/auth", authRoute);
 
-allRoutes.get("", (context) => {
-  return context.json({ message: "Hello, World" }, 200);
-});
+
