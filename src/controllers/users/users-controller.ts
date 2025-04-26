@@ -1,5 +1,6 @@
 import { getPagination } from "../../extras/pagination";
-import { prisma } from "../../extras/prisma";
+import { prismaClient } from "../../integrations/prisma";
+
 import {
   GetAllUsersError,
   GetMeError,
@@ -11,19 +12,25 @@ export const GetMe = async (parameters: {
   userId: string;
 }): Promise<GetMeResult> => {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prismaClient.user.findUnique({
       where: { id: parameters.userId },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+      },
     });
 
     if (!user) {
       throw GetMeError.USER_NOT_FOUND;
     }
 
-    const result: GetMeResult = {
-      user: user,
-    };
-
-    return result;
+    return { user };
   } catch (e) {
     console.error(e);
     throw GetMeError.UNKNOWN;
@@ -37,10 +44,20 @@ export const GetUsers = async (parameter: {
   try {
     const { skip, take } = getPagination(parameter.page, parameter.limit);
 
-    const users = await prisma.user.findMany({
+    const users = await prismaClient.user.findMany({
       orderBy: { name: "asc" },
       skip,
       take,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        createdAt: true,
+        updatedAt: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+      },
     });
 
     if (!users || users.length === 0) {

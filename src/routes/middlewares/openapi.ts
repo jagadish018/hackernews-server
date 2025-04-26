@@ -2,7 +2,7 @@ export const openapi = {
   openapi: "3.0.0",
   info: {
     title: "HackerNews Server API",
-    version: "1.0.0",
+    version: "4.0.0",
   },
   tags: [
     { name: "Auth", description: "Authentication related routes" },

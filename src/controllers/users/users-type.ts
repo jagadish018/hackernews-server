@@ -1,16 +1,32 @@
-import type { User } from "@prisma/client";
-
 export type GetMeResult = {
-  user: User;
+  user: {
+    id: string;
+    name: string | null;
+    username: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    email: string;
+    emailVerified: boolean;
+    image: string | null;
+  };
 };
 
 export enum GetMeError {
-  UNKNOWN = "UNKNOWN",
   USER_NOT_FOUND = "USER_NOT_FOUND",
+  UNKNOWN = "UNKNOWN",
 }
 
 export type GetAllUsersResult = {
-  users: User[];
+  users: {
+    id: string;
+    name: string | null;
+    username: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    email: string;
+    emailVerified: boolean;
+    image: string | null;
+  }[];
 };
 
 export enum GetAllUsersError {

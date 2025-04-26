@@ -1,5 +1,6 @@
 import { getPagination } from "../../extras/pagination";
-import { prisma } from "../../extras/prisma";
+import { prismaClient } from "../../integrations/prisma";
+
 import {
   DeletePostError,
   GetPostsError,
@@ -18,7 +19,7 @@ export const createPost = async (parameters: {
       return PostStatus.USER_NOT_FOUND;
     }
 
-    const post = await prisma.post.create({
+    const post = await prismaClient.post.create({
       data: {
         title: parameters.title,
         content: parameters.content,
@@ -43,7 +44,7 @@ export const getAllPosts = async (parameters: {
   try {
     const { skip, take } = getPagination(parameters.page, parameters.limit);
 
-    const posts = await prisma.post.findMany({
+    const posts = await prismaClient.post.findMany({
       orderBy: { createdAt: "desc" },
       skip,
       take: take,
@@ -51,7 +52,6 @@ export const getAllPosts = async (parameters: {
         author: {
           select: {
             id: true,
-            username: true,
           },
         },
       },
@@ -76,7 +76,7 @@ export const getPostsByUser = async (parameters: {
 }): Promise<GetPostsResult> => {
   try {
     const { skip, take } = getPagination(parameters.page, parameters.limit);
-    const posts = await prisma.post.findMany({
+    const posts = await prismaClient.post.findMany({
       where: {
         userId: parameters.userId,
       },
@@ -110,7 +110,7 @@ export const deletePost = async (params: {
 }): Promise<DeletePostError> => {
   try {
     // Check if the post belongs to the user
-    const post = await prisma.post.findUnique({
+    const post = await prismaClient.post.findUnique({
       where: { id: params.postId },
     });
 
@@ -122,7 +122,7 @@ export const deletePost = async (params: {
       return DeletePostError.UNAUTHORIZED;
     }
 
-    await prisma.post.delete({
+    await prismaClient.post.delete({
       where: { id: params.postId },
     });
 
@@ -131,4 +131,106 @@ export const deletePost = async (params: {
     console.error(error);
     return DeletePostError.DELETE_FAILED;
   }
+};
+
+import { startOfDay, endOfDay, subDays } from "date-fns";
+
+export const getTopPostsToday = async ({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) => {
+  const todayStart = startOfDay(new Date());
+  const todayEnd = endOfDay(new Date());
+  const skip = (page - 1) * limit;
+
+  return await prismaClient.post.findMany({
+    where: {
+      createdAt: {
+        gte: todayStart,
+        lte: todayEnd,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    skip,
+    take: limit,
+    include: {
+      author: {
+        select: {
+          
+          id: true,
+        },
+      },
+    },
+  });
+};
+
+export const getPostsFromYesterday = async ({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) => {
+  const yesterdayStart = startOfDay(subDays(new Date(), 1));
+  const yesterdayEnd = endOfDay(subDays(new Date(), 1));
+  const skip = (page - 1) * limit;
+
+  return await prismaClient.post.findMany({
+    where: {
+      createdAt: {
+        gte: yesterdayStart,
+        lte: yesterdayEnd,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    skip,
+    take: limit,
+    include: {
+      author: {
+        select: {
+          
+          id: true,
+        },
+      },
+    },
+  });
+};
+export const getPostById = async (postId: string) => {
+  const post = await prismaClient.post.findUnique({
+    where: { id: postId },
+    include: {
+      author: { select: { id: true, username: true } },
+      Comment: {
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          user: { select: { username: true } },
+          post: {
+            select: {
+              id: true ,
+              content: true,
+              title: true,
+              createdAt: true,
+              
+            
+          } },
+        },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  return post;
 };

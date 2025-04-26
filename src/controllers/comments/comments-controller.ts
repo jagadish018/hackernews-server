@@ -1,5 +1,6 @@
 import { getPagination } from "../../extras/pagination";
-import { prisma } from "../../extras/prisma";
+import { prismaClient } from "../../integrations/prisma";
+
 import {
   CommentStatus,
   type CreatCommentResult,
@@ -12,7 +13,7 @@ export const createComment = async (params: {
   userId: string;
 }): Promise<CreatCommentResult> => {
   try {
-    const existPostId = await prisma.post.findUnique({
+    const existPostId = await prismaClient.post.findUnique({
       where: { id: params.postId },
     });
 
@@ -20,7 +21,7 @@ export const createComment = async (params: {
       throw new Error(CommentStatus.POST_NOT_FOUND);
     }
 
-    const result = await prisma.comment.create({
+    const result = await prismaClient.comment.create({
       data: {
         content: params.content,
         post: { connect: { id: params.postId } },
@@ -44,7 +45,7 @@ export const getAllComments = async (params: {
   try {
     const { skip, take } = getPagination(params.page, params.limit);
 
-    const comments = await prisma.comment.findMany({
+    const comments = await prismaClient.comment.findMany({
       where: { postId: params.postId }, // Filter by postId
       orderBy: { createdAt: "desc" }, // Reverse chronological order
       skip,
@@ -75,7 +76,7 @@ export const deleteComment = async (params: {
   userId: string;
 }): Promise<CommentStatus> => {
   try {
-    const comment = await prisma.comment.findUnique({
+    const comment = await prismaClient.comment.findUnique({
       where: { id: params.commentId },
     });
 
@@ -83,7 +84,7 @@ export const deleteComment = async (params: {
       return CommentStatus.COMMENT_NOT_FOUND;
     }
 
-    await prisma.comment.delete({ where: { id: params.commentId } });
+    await prismaClient.comment.delete({ where: { id: params.commentId } });
 
     return CommentStatus.DELETE_SUCCESS;
   } catch (error) {
@@ -99,7 +100,7 @@ export const updateComment = async (params: {
   content: string;
 }): Promise<CommentStatus> => {
   try {
-    const comment = await prisma.comment.findUnique({
+    const comment = await prismaClient.comment.findUnique({
       where: { id: params.commentId },
     });
 
@@ -107,7 +108,7 @@ export const updateComment = async (params: {
       return CommentStatus.COMMENT_NOT_FOUND;
     }
 
-    await prisma.comment.update({
+    await prismaClient.comment.update({
       where: { id: params.commentId },
       data: { content: params.content },
     });

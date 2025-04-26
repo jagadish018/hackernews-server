@@ -2,24 +2,27 @@ import { Hono } from "hono";
 import { tokenMiddleware } from "./middlewares/token-middleware";
 import { GetMe, GetUsers } from "../controllers/users/users-controller";
 import { GetAllUsersError, GetMeError } from "../controllers/users/users-type";
+import { sessionMiddleware } from "./middlewares/session-middleware";
 
 export const usersRoutes = new Hono();
 
-usersRoutes.get("/me", tokenMiddleware, async (context) => {
+usersRoutes.get("/me", sessionMiddleware, async (context) => {
   try {
-    const userId = context.get("userId");
-    const result = await GetMe({ userId });
-    if (!result) {
-      return context.json({ error: "User not found" }, 404);
+    const sessionUser = context.get("user"); // pulled from sessionMiddleware
+
+    if (!sessionUser?.id) {
+      return context.json({ error: "User not found in session" }, 401);
     }
+
+    const result = await GetMe({ userId: sessionUser.id });
+
     return context.json(result, 200);
   } catch (error) {
     if (error === GetMeError.USER_NOT_FOUND) {
       return context.json({ error: "User not found" }, 404);
     }
-    if (error === GetMeError.UNKNOWN) {
-      return context.json({ error: "Unknown error" }, 500);
-    }
+    console.error("GetMe error:", error);
+    return context.json({ error: "Unknown error" }, 500);
   }
 });
 

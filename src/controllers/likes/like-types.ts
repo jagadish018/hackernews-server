@@ -1,24 +1,37 @@
-export enum LikeStatus {
-  ALREADY_LIKED = "ALREADY_LIKED",
-  LIKE_SUCCESS = "LIKE_SUCCESS",
-  UNKNOWN = "UNKNOWN",
-  POST_NOT_FOUND = "POST_NOT_FOUND",
-  NO_LIKES_FOUND = "NO_LIKES_FOUND",
-  LIKE_NOT_FOUND = "LIKE_NOT_FOUND",
-  LIKE_DELETED = "LIKE_DELETED",
-}
+export type LikeUser = {
+  id: string;
+  name: string | null;
+};
 
-export type LikeCreate = {
+export type LikeItem = {
+  id: string;
+  createdAt: Date;
+  user: LikeUser;
+};
+
+export type LikeActionResult = {
   status: LikeStatus;
 };
 
-export type GetLikesResult = {
-  likes: {
-    id: string;
-    createdAt: Date;
-    user: {
-      id: string;
-      username: string;
+export enum LikeStatus {
+  LIKE_ADDED = "LIKE_ADDED",
+  LIKE_DELETED = "LIKE_DELETED",
+  LIKE_NOT_FOUND = "LIKE_NOT_FOUND",
+  POST_NOT_FOUND = "POST_NOT_FOUND",
+  NO_LIKES_FOUND = "NO_LIKES_FOUND",
+  UNKNOWN = "UNKNOWN",
+  ALREADY_LIKED = "ALREADY_LIKED",
+  LIKE_SUCCESS = "LIKE_SUCCESS",
+}
+
+export type GetLikesResult =
+  | {
+      status: "SUCCESS";
+      likes: LikeItem[];
+    }
+  | {
+      status:
+        | LikeStatus.POST_NOT_FOUND
+        | LikeStatus.NO_LIKES_FOUND
+        | LikeStatus.UNKNOWN;
     };
-  }[];
-};

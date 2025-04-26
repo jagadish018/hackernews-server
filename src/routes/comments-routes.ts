@@ -1,19 +1,20 @@
 import { Hono } from "hono";
 import { CommentStatus } from "../controllers/comments/comments-type";
-import { tokenMiddleware } from "../routes/middlewares/token-middleware";
 import {
   createComment,
   deleteComment,
   getAllComments,
   updateComment,
 } from "../controllers/comments/comments-controller";
+import { sessionMiddleware } from "./middlewares/session-middleware";
+
 
 export const commentRoutes = new Hono();
 
-commentRoutes.post("/on/:postId", tokenMiddleware, async (c) => {
+commentRoutes.post("/on/:postId", sessionMiddleware, async (c) => {
   try {
     const postId = c.req.param("postId");
-    const userId = c.get("userId");
+    const userId = c.get("user").id; // Get user ID from session
     const { content } = await c.req.json();
 
     const result = await createComment({ content, postId, userId });
@@ -30,8 +31,8 @@ commentRoutes.post("/on/:postId", tokenMiddleware, async (c) => {
   }
 });
 
-//get all comments for a post
-commentRoutes.get("/on/:postId", tokenMiddleware, async (c) => {
+// Get all comments for a post
+commentRoutes.get("/on/:postId", sessionMiddleware, async (c) => {
   const postId = c.req.param("postId");
   const page = Number(c.req.query("page")) || 1;
   const limit = Number(c.req.query("limit")) || 10;
@@ -44,10 +45,10 @@ commentRoutes.get("/on/:postId", tokenMiddleware, async (c) => {
   }
 });
 
-//delete
-commentRoutes.delete("/:commentId", tokenMiddleware, async (c) => {
+// Delete a comment
+commentRoutes.delete("/:commentId", sessionMiddleware, async (c) => {
   const commentId = c.req.param("commentId");
-  const userId = c.get("userId");
+  const userId = c.get("user").id;
 
   try {
     const result = await deleteComment({ commentId, userId });
@@ -57,10 +58,10 @@ commentRoutes.delete("/:commentId", tokenMiddleware, async (c) => {
   }
 });
 
-//update the comment
-commentRoutes.patch("/:commentId", tokenMiddleware, async (c) => {
+// Update a comment
+commentRoutes.patch("/:commentId", sessionMiddleware, async (c) => {
   const commentId = c.req.param("commentId");
-  const userId = c.get("userId");
+  const userId = c.get("user").id;
   const { content } = await c.req.json();
 
   try {

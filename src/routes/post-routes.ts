@@ -1,10 +1,12 @@
 import { Hono } from "hono";
-import { tokenMiddleware } from "./middlewares/token-middleware";
+import { sessionMiddleware } from "./middlewares/session-middleware";
 import {
   createPost,
   deletePost,
   getAllPosts,
   getPostsByUser,
+  getTopPostsToday,
+  getPostsFromYesterday,
 } from "../controllers/posts/post-contoller";
 import {
   DeletePostError,
@@ -13,14 +15,15 @@ import {
 } from "../controllers/posts/post-type";
 
 export const postsRoutes = new Hono();
-postsRoutes.post("/", tokenMiddleware, async (context) => {
+
+postsRoutes.post("/", sessionMiddleware, async (context) => {
   try {
-    const userId = context.get("userId"); //From tokenMiddleware
-    if (!userId) {
+    const user = context.get("user"); //From sessionMiddleware
+    if (!user?.id) {
       return context.json({ error: "Unauthorized" }, 401);
     }
 
-    const { title, content } = await context.req.json(); // Removed userId from here
+    const { title, content } = await context.req.json();
 
     if (!title || !content) {
       return context.json({ error: "Title and Content are required" }, 400);
@@ -29,7 +32,7 @@ postsRoutes.post("/", tokenMiddleware, async (context) => {
     const result = await createPost({
       title,
       content,
-      authorId: userId, //Use authenticated userId only
+      authorId: user.id,
     });
 
     if (result === PostStatus.USER_NOT_FOUND) {
@@ -40,7 +43,7 @@ postsRoutes.post("/", tokenMiddleware, async (context) => {
       return context.json({ error: "Post creation failed" }, 500);
     }
 
-    return context.json(result, 201); //  Post created
+    return context.json(result, 201);
   } catch (error) {
     console.error(error);
     return context.json({ error: "Server error" }, 500);
@@ -48,7 +51,7 @@ postsRoutes.post("/", tokenMiddleware, async (context) => {
 });
 
 // GET /posts - Paginated, reverse chronological
-postsRoutes.get("/", tokenMiddleware, async (context) => {
+postsRoutes.get("/", async (context) => {
   try {
     const page = parseInt(context.req.query("page") || "1", 10);
     const limit = parseInt(context.req.query("limit") || "2", 10);
@@ -68,13 +71,13 @@ postsRoutes.get("/", tokenMiddleware, async (context) => {
   }
 });
 
-//Get all posts in reverse chronological order of the current user
-postsRoutes.get("/me", tokenMiddleware, async (context) => {
+// Get all posts in reverse chronological order of the current user
+postsRoutes.get("/me", sessionMiddleware, async (context) => {
   try {
-    const userId = context.get("userId");
+    const user = context.get("user");
     const page = parseInt(context.req.query("page") || "1", 10);
     const limit = parseInt(context.req.query("limit") || "2", 10);
-    const result = await getPostsByUser({ userId, page, limit });
+    const result = await getPostsByUser({ userId: user.id, page, limit });
 
     if (!result) {
       return context.json({ error: "No posts found" }, 404);
@@ -87,17 +90,17 @@ postsRoutes.get("/me", tokenMiddleware, async (context) => {
   }
 });
 
-//delete by userId
-postsRoutes.delete("/:postId", tokenMiddleware, async (context) => {
+// Delete by userId
+postsRoutes.delete(":postId", sessionMiddleware, async (context) => {
   try {
-    const userId = context.get("userId");
+    const user = context.get("user");
     const postId = context.req.param("postId");
 
-    if (!userId) {
+    if (!user?.id) {
       return context.json({ error: "Unauthorized" }, 401);
     }
 
-    const result = await deletePost({ postId, userId });
+    const result = await deletePost({ postId, userId: user.id });
 
     if (result === DeletePostError.POST_NOT_FOUND) {
       return context.json({ error: "Post not found" }, 404);
@@ -118,5 +121,60 @@ postsRoutes.delete("/:postId", tokenMiddleware, async (context) => {
   } catch (error) {
     console.error(error);
     return context.json({ error: "Server error" }, 500);
+  }
+});
+
+postsRoutes.get("/new", async (context) => {
+  try {
+    const page = parseInt(context.req.query("page") || "1", 10);
+    const limit = parseInt(context.req.query("limit") || "5", 10);
+
+    const posts = await getTopPostsToday({ page, limit });
+
+    if (!posts || posts.length === 0) {
+      return context.json({ error: "No posts found" }, 404);
+    }
+
+    return context.json({ posts }, 200);
+  } catch (error) {
+    console.error(error);
+    return context.json({ error: "Server error" }, 500);
+  }
+});
+
+postsRoutes.get("/past", async (context) => {
+  try {
+    const page = parseInt(context.req.query("page") || "1", 10);
+    const limit = parseInt(context.req.query("limit") || "5", 10);
+
+    const posts = await getPostsFromYesterday({ page, limit });
+
+    if (!posts || posts.length === 0) {
+      return context.json({ error: "No posts found" }, 404);
+    }
+
+    return context.json({ posts }, 200);
+  } catch (error) {
+    console.error(error);
+    return context.json({ error: "Server error" }, 500);
+  }
+});
+
+import { getPostById } from "../controllers/posts/post-contoller";
+
+postsRoutes.get("/:postId", async (c) => {
+  try {
+    const postId = c.req.param("postId");
+    
+    const post = await getPostById(postId);
+
+    if (!post) {
+      return c.json({ error: "Post not found" }, 404);
+    }
+
+
+    return c.json({ post }, 200);
+  } catch (error) {
+    return c.json({ error: "Post not found" }, 404);
   }
 });
