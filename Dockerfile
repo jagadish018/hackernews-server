@@ -1,4 +1,4 @@
-FROM node:18-lts-slim
+FROM node:22.1.0
 
 WORKDIR /app
 
