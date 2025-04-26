@@ -18,7 +18,4 @@ allRoutes.route("/likes", likeRoutes);
 allRoutes.route("/comments", commentRoutes);
 allRoutes.route("/auth", authRoute); // removed extra `/api` since handled in main app
 
-// Load .env in development only
-if (process.env.NODE_ENV !== "production") {
-  await import("dotenv/config"); // Use await import instead of require in ESM
-}
+
