@@ -1,4 +1,5 @@
-import type { Comment } from "@prisma/client";
+import type { Comment } from "../../generated/prisma";
+
 
 export enum CommentStatus {
   POST_NOT_FOUND = "POST_NOT_FOUND",

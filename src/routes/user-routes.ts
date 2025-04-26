@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { tokenMiddleware } from "./middlewares/token-middleware";
+
 import { GetMe, GetUsers } from "../controllers/users/users-controller";
 import { GetAllUsersError, GetMeError } from "../controllers/users/users-type";
 import { sessionMiddleware } from "./middlewares/session-middleware";
@@ -26,7 +26,7 @@ usersRoutes.get("/me", sessionMiddleware, async (context) => {
   }
 });
 
-usersRoutes.get("/", tokenMiddleware, async (context) => {
+usersRoutes.get("/", sessionMiddleware, async (context) => {
   try {
     const page = parseInt(context.req.query("page") || "1", 10);
     const limit = parseInt(context.req.query("limit") || "2", 10);
