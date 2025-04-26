@@ -13,7 +13,7 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: "https://hackernews-ui-flax.vercel.app",
+    origin: "*",
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
