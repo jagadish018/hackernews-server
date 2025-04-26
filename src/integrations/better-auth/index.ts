@@ -12,7 +12,7 @@ const betterAuthServerClient = betterAuth({
   baseURL: serverUrl,
   trustedOrigins: [webClientUrl],
   secret: betterAuthSecret,
-  plugins:[username()],
+  plugins: [username()],
   database: prismaAdapter(prismaClient, {
     provider: "postgresql",
   }),
@@ -31,8 +31,6 @@ const betterAuthServerClient = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-
-  
 });
 
 export default betterAuthServerClient;
