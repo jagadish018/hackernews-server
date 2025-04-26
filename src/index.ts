@@ -9,19 +9,6 @@ import { allRoutes } from "./routes/routes";
 // Create top-level app
 const app = new Hono();
 
-// Apply CORS globally
-app.use(
-  "*",
-  cors({
-    origin: "*",
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    credentials: true,
-  })
-);
-
-// Mount your routes
-app.route("/", allRoutes);
 
 // Serve
 serve(app, (info) => {

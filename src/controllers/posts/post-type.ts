@@ -1,4 +1,4 @@
-import type { Post } from "../../generated/prisma";
+import type { Post } from "../../generated/prisma/client";
 
 
 export type PostCreateResult = {

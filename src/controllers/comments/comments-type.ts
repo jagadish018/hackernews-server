@@ -1,4 +1,5 @@
-import type { Comment } from "../../generated/prisma";
+import type { Comment } from "../../generated/prisma/client";
+
 
 
 export enum CommentStatus {
