@@ -33,3 +33,8 @@ export enum GetAllUsersError {
   NO_USERS_FOUND = "NO_USERS_FOUND",
   UNKNOWN = "UNKNOWN",
 }
+
+export enum GetUserByIdError {
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  UNKNOWN = "UNKNOWN",
+}

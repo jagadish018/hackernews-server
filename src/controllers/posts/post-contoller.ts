@@ -47,11 +47,29 @@ export const getAllPosts = async (parameters: {
     const posts = await prismaClient.post.findMany({
       orderBy: { createdAt: "desc" },
       skip,
-      take: take,
+      take,
       include: {
         author: {
           select: {
             id: true,
+            username: true,
+            name: true,
+          },
+        },
+        Comment: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+          
+          },
+        },
+        Like: {
+          select: {
+            id: true,
+            userId: true,
+            createdAt: true,
+            
           },
         },
       },
@@ -67,6 +85,7 @@ export const getAllPosts = async (parameters: {
     throw new Error(GetPostsError.UNKNOWN);
   }
 };
+
 
 //Retreive all the post of specific user
 export const getPostsByUser = async (parameters: {
@@ -161,8 +180,9 @@ export const getTopPostsToday = async ({
     include: {
       author: {
         select: {
-          
           id: true,
+          name: true,
+          username: true,
         },
       },
     },
@@ -197,6 +217,8 @@ export const getPostsFromYesterday = async ({
         select: {
           
           id: true,
+          name: true,
+          username:true,
         },
       },
     },

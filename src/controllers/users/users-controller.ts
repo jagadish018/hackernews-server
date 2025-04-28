@@ -4,6 +4,7 @@ import { prismaClient } from "../../integrations/prisma";
 import {
   GetAllUsersError,
   GetMeError,
+
   type GetAllUsersResult,
   type GetMeResult,
 } from "./users-type";
@@ -23,8 +24,33 @@ export const GetMe = async (parameters: {
         email: true,
         emailVerified: true,
         image: true,
+        posts: {
+          select: {
+            id: true,
+            title: true,
+            content: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        Comment: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            postId: true,
+          },
+        },
+        Like: {
+          select: {
+            id: true,
+            createdAt: true,
+            postId: true,
+          },
+        },
       },
     });
+
 
     if (!user) {
       throw GetMeError.USER_NOT_FOUND;
@@ -70,3 +96,10 @@ export const GetUsers = async (parameter: {
     throw GetAllUsersError.UNKNOWN;
   }
 };
+
+
+
+interface GetUserByIdProps {
+  userId: string;
+}
+

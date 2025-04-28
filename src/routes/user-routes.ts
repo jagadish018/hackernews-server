@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
 import { GetMe, GetUsers } from "../controllers/users/users-controller";
-import { GetAllUsersError, GetMeError } from "../controllers/users/users-type";
+import { GetAllUsersError, GetMeError, GetUserByIdError } from "../controllers/users/users-type";
 import { sessionMiddleware } from "./middlewares/session-middleware";
 
 export const usersRoutes = new Hono();
@@ -43,5 +43,24 @@ usersRoutes.get("/", sessionMiddleware, async (context) => {
     if (error === GetAllUsersError.UNKNOWN) {
       return context.json({ error: "Unknown error" }, 500);
     }
+  }
+});
+
+
+usersRoutes.get("/profile/:userId", async (context) => {
+  try {
+
+    const userId = context.req.param("userId"); // Use param() method instead of params
+    const result = await GetMe({ userId });
+    
+
+    if (!result) {
+      return context.json({ error: "User not found" }, 404);
+    }
+
+    return context.json(result, 200);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return context.json({ error: "Failed to fetch user profile" }, 500);
   }
 });
