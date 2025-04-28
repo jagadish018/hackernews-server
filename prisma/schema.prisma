@@ -13,8 +13,8 @@ datasource db {
 model User {
   id              String    @id @default(uuid())
   name            String?
-  username        String?   @unique
-  displayUsername String?
+  username        String   @unique
+  displayUsername String
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   posts           Post[]
@@ -68,7 +68,7 @@ model Comment {
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String @unique
   createdAt DateTime
   updatedAt DateTime
   ipAddress String?
@@ -76,7 +76,7 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
+
 }
 
 model Account {
