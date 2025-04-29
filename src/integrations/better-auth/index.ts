@@ -31,6 +31,10 @@ const betterAuthServerClient = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  cookieCache: {
+    enabled: true, // Enable caching session in cookie (default: `false`)
+    maxAge: 300, // 5 minutes
+  },
 });
 
 export default betterAuthServerClient;

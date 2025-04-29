@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { type Session, type User } from "better-auth";
 import { createMiddleware } from "hono/factory";
-import  betterAuthClient  from "../../integrations/better-auth";
+import betterAuthClient from "../../integrations/better-auth";
 
 export const authRoute = new Hono();
 
-authRoute.on(["GET", "POST"], "*", (context) => {
+authRoute.on(["GET", "POST"], "*", async (context) => {
   return betterAuthClient.handler(context.req.raw);
 });
 
