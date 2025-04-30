@@ -14,6 +14,8 @@ allRoutes.use(
     origin: "https://hackernews-ui-flax.vercel.app", // ✅ Only allow your frontend
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
     credentials: true,
   })
 );
