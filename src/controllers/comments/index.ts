@@ -1,12 +1,8 @@
 import { Hono } from "hono";
-import { CommentStatus } from "../controllers/comments/comments-type";
-import {
-  createComment,
-  deleteComment,
-  getAllComments,
-  updateComment,
-} from "../controllers/comments/comments-controller";
-import { sessionMiddleware } from "./middlewares/session-middleware";
+import { sessionMiddleware } from "../../routes/middlewares/session-middleware";
+import { createComment, getAllComments, deleteComment, updateComment } from "./comments-controller";
+import { CommentStatus } from "./comments-type";
+
 
 
 export const commentRoutes = new Hono();

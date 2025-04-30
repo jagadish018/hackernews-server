@@ -1,18 +1,8 @@
 import { Hono } from "hono";
-import { sessionMiddleware } from "./middlewares/session-middleware";
-import {
-  createPost,
-  deletePost,
-  getAllPosts,
-  getPostsByUser,
-  getTopPostsToday,
-  getPostsFromYesterday,
-} from "../controllers/posts/post-contoller";
-import {
-  DeletePostError,
-  GetPostsError,
-  PostStatus,
-} from "../controllers/posts/post-type";
+import { sessionMiddleware } from "../../routes/middlewares/session-middleware";
+import { createPost, deletePost, getAllPosts, getPostById, getPostsByUser, getPostsFromYesterday, getTopPostsToday } from "./post-contoller";
+import { DeletePostError, GetPostsError, PostStatus } from "./post-type";
+
 
 export const postsRoutes = new Hono();
 
@@ -160,7 +150,7 @@ postsRoutes.get("/past", async (context) => {
   }
 });
 
-import { getPostById } from "../controllers/posts/post-contoller";
+
 
 postsRoutes.get("/:postId", async (c) => {
   try {

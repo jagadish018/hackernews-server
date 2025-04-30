@@ -1,14 +1,8 @@
-import {
 
-  createLike,
-  deleteLikeOnPost,
-  getLikesOnPost,
-} from "../controllers/likes/like-controllers";
-import { LikeStatus } from "../controllers/likes/like-types";
-
-
-import { sessionMiddleware } from "./middlewares/session-middleware";
 import { Hono } from "hono";
+import { createLike, getLikesOnPost, deleteLikeOnPost } from "./like-controllers";
+import { LikeStatus } from "./like-types";
+import { sessionMiddleware } from "../../routes/middlewares/session-middleware";
 
 export const likeRoutes = new Hono();
 
