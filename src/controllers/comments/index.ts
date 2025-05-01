@@ -28,7 +28,7 @@ commentRoutes.post("/on/:postId", sessionMiddleware, async (c) => {
 });
 
 // Get all comments for a post
-commentRoutes.get("/on/:postId", sessionMiddleware, async (c) => {
+commentRoutes.get("/on/:postId", async (c) => {
   const postId = c.req.param("postId");
   const page = Number(c.req.query("page")) || 1;
   const limit = Number(c.req.query("limit")) || 10;

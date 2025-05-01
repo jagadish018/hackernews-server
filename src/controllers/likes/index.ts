@@ -41,7 +41,7 @@ likeRoutes.post("/on/:postId", sessionMiddleware, async (context) => {
 });
 
 // GET - Get all likes on a specific post
-likeRoutes.get("/on/:postId", sessionMiddleware, async (context) => {
+likeRoutes.get("/on/:postId", async (context) => {
   try {
     const postId = context.req.param("postId");
     const page = parseInt(context.req.query("page") || "1", 10);
