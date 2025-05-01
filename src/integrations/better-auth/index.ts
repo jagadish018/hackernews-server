@@ -21,6 +21,12 @@ const betterAuthServerClient = betterAuth({
   },
   session: {
     modelName: "Session",
+
+    // ✅ Add cookie config here
+    cookie: {
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
   },
   account: {
     modelName: "Account",
@@ -32,9 +38,10 @@ const betterAuthServerClient = betterAuth({
     enabled: true,
   },
   cookieCache: {
-    enabled: true, // Enable caching session in cookie (default: `false`)
-    maxAge: 300, // 5 minutes
+    enabled: true,
+    maxAge: 300,
   },
 });
+
 
 export default betterAuthServerClient;
