@@ -3,6 +3,8 @@ import { Hono } from "hono";
 import { GetMe, GetUsers } from "../../controllers/users/users-controller";
 import { GetAllUsersError, GetMeError, GetUserByIdError } from "../../controllers/users/users-type";
 import { sessionMiddleware } from "../../routes/middlewares/session-middleware";
+import { SearchUsers } from "../../controllers/users/users-controller";
+
 
 export const usersRoutes = new Hono();
 
@@ -62,5 +64,33 @@ usersRoutes.get("/profile/:userId", async (context) => {
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return context.json({ error: "Failed to fetch user profile" }, 500);
+  }
+});
+
+
+
+
+usersRoutes.get("/search", async (context) => {
+  try {
+    const query = context.req.query("q") || "";
+    const page = parseInt(context.req.query("page") || "1", 10);
+    const limit = parseInt(context.req.query("limit") || "10", 10);
+
+    if (!query) {
+      return context.json({ error: "Query parameter 'q' is required" }, 400);
+    }
+
+    const result = await SearchUsers({ query, page, limit });
+
+    return context.json(result, 200);
+  } catch (error) {
+    if (error === GetAllUsersError.NO_USERS_FOUND) {
+      return context.json({ error: "No users found matching the query" }, 404);
+    }
+    console.error("SearchUsers error:", error);
+    return context.json(
+      { error: "Unknown error occurred while searching" },
+      500
+    );
   }
 });
